@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neumorphic Calculator</title>
+
+<style>
+:root{
+    --bg:#e6e6e6;
+    --card:#e6e6e6;
+    --text:#111;
+    --shadow-light:#ffffff;
+    --shadow-dark:#c8c8c8;
+    --accent:#ff8c00;
+}
+
+body.dark{
+    --bg:#111;
+    --card:#1a1a1a;
+    --text:#fff;
+    --shadow-light:#222;
+    --shadow-dark:#000;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    transition:0.3s;
+}
+
+/* Calculator */
+.calculator{
+    width:330px;
+    padding:20px;
+    border-radius:30px;
+    background:var(--card);
+    box-shadow: 8px 8px 20px var(--shadow-dark),
+                -8px -8px 20px var(--shadow-light);
+}
+
+/* Top Bar */
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+/* Toggle Switch */
+.switch{
+    position:relative;
+    width:50px;
+    height:26px;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:var(--accent);
+    border-radius:30px;
+}
+
+.slider:before{
+    content:"";
+    position:absolute;
+    height:20px;
+    width:20px;
+    left:4px;
+    top:3px;
+    background:white;
+    border-radius:50%;
+    transition:0.3s;
+}
+
+input:checked + .slider:before{
+    transform:translateX(24px);
+}
+
+/* 3 Dot Menu */
+.menu{
+    position:relative;
+    cursor:pointer;
+}
+
+.dots{
+    font-size:22px;
+    color:var(--text);
+}
+
+.dropdown{
+    position:absolute;
+    right:0;
+    top:30px;
+    background:var(--card);
+    border-radius:12px;
+    padding:10px;
+    display:none;
+    flex-direction:column;
+    box-shadow: 5px 5px 15px var(--shadow-dark),
+                -5px -5px 15px var(--shadow-light);
+}
+
+.dropdown button{
+    background:none;
+    border:none;
+    padding:8px;
+    text-align:left;
+    cursor:pointer;
+    color:var(--text);
+}
+
+.dropdown button:hover{
+    color:var(--accent);
+}
+
+/* Display */
+.display{
+    height:80px;
+    border-radius:20px;
+    padding:15px;
+    font-size:30px;
+    text-align:right;
+    background:var(--card);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                inset -5px -5px 10px var(--shadow-light);
+    margin-bottom:20px;
+    color:var(--text);
+
+    overflow:hidden;              /* Prevent outside overflow */
+    white-space:nowrap;           /* Keep in single line */
+    text-overflow:ellipsis;       /* Optional fade */
+}
+
+/* Buttons */
+.buttons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+}
+
+button{
+    height:65px;
+    border:none;
+    border-radius:50%;
+    font-size:20px;
+    background:var(--card);
+    color:var(--text);
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:active{
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                inset -5px -5px 10px var(--shadow-light);
+}
+
+.equal{
+    background:linear-gradient(145deg,#ffa500,#ff7b00);
+    color:#fff;
+}
+
+/* Scientific */
+.scientific{
+    display:none;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.scientific.active{
+    display:grid;
+}
+
+.history{
+    display:none;
+    margin-top:15px;
+    max-height:150px;
+    overflow-y:auto;
+}
+
+.history.active{
+    display:block;
+}
+
+.dropdown{
+    display:none;
+    flex-direction:column;
+}
+.history-screen{
+    position:absolute;
+    width:330px;
+    height:520px;
+    background:var(--card);
+    border-radius:30px;
+    padding:20px;
+    display:none;
+    flex-direction:column;
+
+    box-shadow: 8px 8px 20px var(--shadow-dark),
+                -8px -8px 20px var(--shadow-light);
+}
+
+.history-screen.active{
+    display:flex;
+}
+
+.history-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    font-size:18px;
+}
+
+.history-header span{
+    cursor:pointer;
+}
+
+.history-list{
+    flex:1;
+    overflow-y:auto;
+}
+.history-screen{
+    color: var(--text);
+}
+
+.history-list div{
+    color: var(--text);
+    margin-bottom:10px;
+    font-size:16px;
+}
+/* MOBILE OPTIMIZATION */
+@media (max-width:480px){
+
+body{
+    padding:10px;
+}
+
+/* Calculator full width */
+.calculator{
+    width:100%;
+    max-width:360px;
+    padding:18px;
+}
+
+/* Display smaller for phone */
+.display{
+    height:70px;
+    font-size:24px;
+    padding:12px;
+}
+
+/* Buttons smaller */
+button{
+    height:58px;
+    font-size:18px;
+}
+
+/* Button grid spacing */
+.buttons{
+    gap:14px;
+}
+
+/* History screen responsive */
+.history-screen{
+    width:100%;
+    max-width:360px;
+    height:500px;
+}
+
+/* History header */
+.history-header{
+    font-size:16px;
+}
+
+/* History list text */
+.history-list div{
+    font-size:14px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+<div class="top-bar">
+
+    <!-- Toggle -->
+    <label class="switch">
+        <input type="checkbox" onchange="toggleTheme()">
+        <span class="slider"></span>
+    </label>
+
+    <!-- 3 Dot Menu -->
+    <div class="menu" onclick="toggleMenu()">
+        <span class="dots">⋮</span>
+        <div class="dropdown" id="dropdown">
+            <button id="modeBtn" onclick="toggleScientific()">Scientific</button>
+            <button onclick="toggleHistory()">History</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="display" id="display">0</div>
+
+<div class="scientific" id="scientific">
+    <button onclick="insert('Math.sin(')">sin</button>
+    <button onclick="insert('Math.cos(')">cos</button>
+    <button onclick="insert('Math.tan(')">tan</button>
+    <button onclick="insert('Math.sqrt(')">√</button>
+</div>
+
+<div class="buttons">
+    <button onclick="clearAll()">AC</button>
+    <button onclick="insert('%')">%</button>
+    <button onclick="backspace()">⌫</button>
+    <button onclick="insert('/')">÷</button>
+
+    <button onclick="insert('7')">7</button>
+    <button onclick="insert('8')">8</button>
+    <button onclick="insert('9')">9</button>
+    <button onclick="insert('*')">×</button>
+
+    <button onclick="insert('4')">4</button>
+    <button onclick="insert('5')">5</button>
+    <button onclick="insert('6')">6</button>
+    <button onclick="insert('-')">−</button>
+
+    <button onclick="insert('1')">1</button>
+    <button onclick="insert('2')">2</button>
+    <button onclick="insert('3')">3</button>
+    <button onclick="insert('+')">+</button>
+
+    <button onclick="insert('00')">00</button>
+    <button onclick="insert('0')">0</button>
+    <button onclick="insert('.')">.</button>
+    <button class="equal" onclick="calculate()">=</button>
+</div>
+
+<div class="history" id="history"></div>
+
+</div>  <!-- calculator ends -->
+
+<!-- History Screen -->
+<div class="history-screen" id="historyScreen">
+
+    <div class="history-header">
+        <span onclick="closeHistory()">← Calculator</span>
+        <b>History</b>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const display = document.getElementById("display");
+const dropdown = document.getElementById("dropdown");
+const scientific = document.getElementById("scientific");
+const historyBox = document.getElementById("history");
+const modeBtn = document.getElementById("modeBtn");
+
+/* Insert numbers/operators */
+function insert(val){
+    if(display.innerText === "0" || display.innerText === "Error"){
+        display.innerText = "";
+    }
+
+    display.innerText += val;
+
+    display.scrollLeft = display.scrollWidth;
+}
+
+/* Clear only display */
+function clearAll(){
+    display.innerText = "0";
+}
+
+/* Backspace */
+function backspace(){
+    display.innerText = display.innerText.slice(0,-1);
+
+    if(display.innerText === ""){
+        display.innerText = "0";
+    }
+
+    display.scrollLeft = display.scrollWidth;
+}
+
+/* Calculate */
+function calculate(){
+
+    try{
+
+        let expression = display.innerText;
+
+        /* Easter Egg */
+       if(expression === "1822"){
+    display.style.fontSize = "18px";
+    display.innerText = "Developed by Keshab Thakur";
+    return;
+}
+        let result = eval(expression);
+
+        let item = document.createElement("div");
+        item.innerText = expression + " = " + result;
+
+        document.getElementById("historyList").prepend(item);
+
+        display.innerText = result;
+
+        display.scrollLeft = display.scrollWidth;
+
+    }
+    catch{
+        display.innerText = "Error";
+    }
+}
+/* Menu Toggle */
+function toggleMenu(){
+
+    if(dropdown.style.display === "flex"){
+        dropdown.style.display = "none";
+    }
+    else{
+        dropdown.style.display = "flex";
+    }
+
+}
+
+/* Scientific Mode */
+function toggleScientific(){
+
+    scientific.classList.toggle("active");
+
+    if(scientific.classList.contains("active")){
+        modeBtn.innerText = "Calculator";
+        historyBox.classList.remove("active");
+    }
+    else{
+        modeBtn.innerText = "Scientific";
+    }
+
+    dropdown.style.display = "none";
+
+}
+
+/* History Toggle */
+function toggleHistory(){
+
+    document.querySelector(".calculator").style.display = "none";
+    document.getElementById("historyScreen").classList.add("active");
+
+    dropdown.style.display = "none";
+
+}
+function closeHistory(){
+
+    document.querySelector(".calculator").style.display = "block";
+    document.getElementById("historyScreen").classList.remove("active");
+
+}
+
+/* Dark Mode */
+function toggleTheme(){
+    document.body.classList.toggle("dark");
+}
+
+/* Close menu when clicking outside */
+document.addEventListener("click", function(e){
+
+    if(!e.target.closest(".menu")){
+        dropdown.style.display = "none";
+    }
+
+});
+
+</script>
+
+</body>
+</html>
